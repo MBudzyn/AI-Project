@@ -1,8 +1,8 @@
 from typeguard import *
 from Card import Card
 
-@typechecked
 
+@typechecked
 class Player:
     def __init__(self):
         self.hand: list['Card'] = []
@@ -21,13 +21,7 @@ class Player:
         if len(tmp) < 2:
             return False
 
-        for i in range(len(tmp) - 1):
-            for j in range(i + 1, len(tmp)):
-                if tmp[i].is_meld(tmp[j]):
-                    return True
-        return False
+        return any([tmp[i].is_meld(tmp[j]) for i in range(len(tmp) - 1) for j in range(i + 1, len(tmp))])
 
     def correct_hand(self) -> bool:
         return self.have_eighteen() and (not self.have_meld())
-
-
