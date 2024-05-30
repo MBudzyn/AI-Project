@@ -1,6 +1,5 @@
 from typeguard import *
-
-rank_value_dict = {'N': 0, 'T': 10, 'J': 2, 'Q': 3, 'K': 4, 'A': 11}
+from GlobalVariables import RANK_VALUE_DICT
 
 
 @typechecked
@@ -8,7 +7,7 @@ class Card:
     def __init__(self, rank: str, suit: str):
         self.rank = rank
         self.suit = suit
-        self.value = rank_value_dict[rank]
+        self.value = RANK_VALUE_DICT[rank]
 
     def __eq__(self, other: 'Card') -> bool:
         return self.rank == other.rank and self.suit == other.suit
