@@ -1,5 +1,5 @@
 from typeguard import *
-from GlobalVariables import RANK_VALUE_DICT
+from GlobalVariables import RANK_VALUE_DICT, QUALITY_DICT
 
 
 @typechecked
@@ -8,6 +8,7 @@ class Card:
         self.rank = rank
         self.suit = suit
         self.value = RANK_VALUE_DICT[rank]
+        self.quality = QUALITY_DICT[rank]
 
     def __copy__(self):
         return Card(self.rank, self.suit)
