@@ -9,6 +9,12 @@ class Card:
         self.suit = suit
         self.value = RANK_VALUE_DICT[rank]
 
+    def __copy__(self):
+        return Card(self.rank, self.suit)
+
+    def __str__(self) -> str:
+        return f"{self.rank}-{self.suit}"
+
     def __eq__(self, other: 'Card') -> bool:
         return self.rank == other.rank and self.suit == other.suit
 
