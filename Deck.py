@@ -23,12 +23,12 @@ class Deck:
 
 
 
-deck = Deck()
-hand1, hand2, hand3, hand4 = deck.split_three_seven_seven_seven()
-print([str(card) for card in hand1])
-print([str(card) for card in hand2])
-print([str(card) for card in hand3])
-print([str(card) for card in hand4])
+# deck = Deck()
+# hand1, hand2, hand3, hand4 = deck.split_three_seven_seven_seven()
+# print([str(card) for card in hand1])
+# print([str(card) for card in hand2])
+# print([str(card) for card in hand3])
+# print([str(card) for card in hand4])
 
 
 
