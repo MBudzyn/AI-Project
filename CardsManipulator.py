@@ -93,6 +93,8 @@ class CardsManipulator:
 
         return res
 
+
+
     def dict_of_probabilities(self, data: list[tuple[int, int, float]]) -> dict[str, float]:
         res = {"<100": 0,">=100": 0,">=110":0,">=120": 0
                ,">=130": 0,">=140": 0,">=150": 0,">=160": 0
@@ -128,6 +130,10 @@ class CardsManipulator:
             if value >= 220:
                 res[">=220"] += percentage
         return res
+
+    def get_dict_of_probabilities(self, hand: list['Card']) -> dict[str, float]:
+        p = self.calculate_all_pos_results(hand)
+        return self.dict_of_probabilities(self.parse_all_pos_results(p))
 
 deck = Deck()
 hand1, hand2, hand3, hand4 = deck.split_three_seven_seven_seven()
