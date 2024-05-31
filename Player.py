@@ -1,7 +1,7 @@
 from typeguard import *
 from Card import Card
 from CardsManipulator import CardsManipulator
-
+import random
 
 @typechecked
 class Player:
@@ -11,7 +11,10 @@ class Player:
         self.trick_pile: list['Card'] = []
         self.other_players: list['Player'] = []
         self.cards_manipulator = CardsManipulator()
+        self.actual_value_in_auction = 0 # pamietac zeby aktualizowac
 
+    def set_hand(self, hand: list['Card']):
+        self.hand = hand
     def calculate_act_score(self) -> int:
         return sum([card.value for card in self.trick_pile])
 
@@ -35,6 +38,9 @@ class Player:
             if card.suit in suites:
                 counter += 1
         return counter
+
+    def decide_to_play_or_pass(self, points: int) -> bool:
+        return random.choice([True, False])
 
 
 

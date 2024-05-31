@@ -21,6 +21,6 @@ class Bot(Player):
         if cards_in_meld_suite >= 4 and probabilities[f">={points}"] > 35:
             return True
         return probabilities[f">={points}"] > 50
-        
+
 
 
