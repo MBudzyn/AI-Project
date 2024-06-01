@@ -12,6 +12,8 @@ class Auction:
         self.players_in_order = players_in_order
         self.talon: list['Card'] = []
         self.cards_manipulator: CardsManipulator = CardsManipulator()
+        self.playing_player_index = 0
+        self.active_player_index = 0
 
     def deal_start_cards(self):
         hand1, hand2, hand3, hand4 = self.deck.split_three_seven_seven_seven()
@@ -53,8 +55,10 @@ class Auction:
             turn_index += 1
 
         active_player_index = in_play.index(True)
+        self.active_player_index = active_player_index
         active_player = self.players_in_order[active_player_index]
         active_player.hand += self.talon
+        print(self.active_player_index)
 
 
 
