@@ -1,19 +1,16 @@
 from typeguard import *
 from Card import Card
-from Deck import Deck
 from GlobalVariables import MELD_POINTS_DICT, POINTS_IN_ROUND
+from Deck import Deck
+
 
 @typechecked
 class CardsManipulator:
     def __init__(self):
-        pass
-    def full_deck(self) -> list['Card']:
-        res = []
-        for rank in ["N", "T", "J", "Q", "K", "A"]:
-            for suit in ["H", "D", "C", "S"]:
-                res.append(Card(rank, suit))
-        return res
+        self.deck = Deck()
 
+    def full_deck(self) -> list['Card']:
+        return self.deck.full_deck()
     def get_missing_cards(self, hand: list['Card']) -> list['Card']:
         return [card for card in self.full_deck() if card not in hand]
 
@@ -30,12 +27,12 @@ class CardsManipulator:
         return [hand + talon for talon in self.get_all_poss_talons(hand)]
 
     def parse_pos_hand(self, pos_hand: list['Card']) -> dict[str, list[int]]:
-        res = {"H":[0,0,0,0,0,0], "D":[0,0,0,0,0,0], "C":[0,0,0,0,0,0], "S":[0,0,0,0,0,0]}
+        res = {"H": [0, 0, 0, 0, 0, 0], "D": [0, 0, 0, 0, 0, 0], "C": [0, 0, 0, 0, 0, 0], "S": [0, 0, 0, 0, 0, 0]}
         for card in pos_hand:
             res[card.suit][card.quality] += 1
         return res
 
-    def guaranteed_winners(self,pos_hand: list['Card']) -> dict[str, list[int]]:
+    def guaranteed_winners(self, pos_hand: list['Card']) -> dict[str, list[int]]:
         parsed = self.parse_pos_hand(pos_hand)
         res = {"H": [0, 0, 0, 0, 0, 0], "D": [0, 0, 0, 0, 0, 0], "C": [0, 0, 0, 0, 0, 0], "S": [0, 0, 0, 0, 0, 0]}
         for k, value in parsed.items():
@@ -70,7 +67,7 @@ class CardsManipulator:
                     w_n += 1
 
         res += max([0] + [MELD_POINTS_DICT[meld] for meld in melds])
-        res += sum(points_in_round[:w_n ])
+        res += sum(points_in_round[:w_n])
         return res
 
     def calculate_all_pos_results(self, hand: list['Card']) -> list[int]:
@@ -85,21 +82,19 @@ class CardsManipulator:
             while iterator < len(all_pos_results) and all_pos_results[iterator] == all_pos_results[iterator - 1]:
                 counter += 1
                 iterator += 1
-            res.append((all_pos_results[iterator - 1], counter, round(counter / len(all_pos_results) * 100,2)))
+            res.append((all_pos_results[iterator - 1], counter, round(counter / len(all_pos_results) * 100, 2)))
             counter = 1
             iterator += 1
         if len(all_pos_results) > 1 and all_pos_results[-1] != all_pos_results[-2]:
-            res.append((all_pos_results[-1], 1, round(1 / len(all_pos_results) * 100,2)))
+            res.append((all_pos_results[-1], 1, round(1 / len(all_pos_results) * 100, 2)))
 
         return res
 
-
-
     def dict_of_probabilities(self, data: list[tuple[int, int, float]]) -> dict[str, float]:
-        res = {"<100": 0,">=100": 0,">=110":0,">=120": 0
-               ,">=130": 0,">=140": 0,">=150": 0,">=160": 0
-               ,">=170": 0,">=180": 0,">=190": 0,">=200": 0
-               ,">=210": 0,">=220": 0}
+        res = {"<100": 0, ">=100": 0, ">=110": 0, ">=120": 0
+            , ">=130": 0, ">=140": 0, ">=150": 0, ">=160": 0
+            , ">=170": 0, ">=180": 0, ">=190": 0, ">=200": 0
+            , ">=210": 0, ">=220": 0}
         for value, count, percentage in data:
             if value < 100:
                 res["<100"] += percentage
@@ -134,15 +129,3 @@ class CardsManipulator:
     def get_dict_of_probabilities(self, hand: list['Card']) -> dict[str, float]:
         p = self.calculate_all_pos_results(hand)
         return self.dict_of_probabilities(self.parse_all_pos_results(p))
-
-deck = Deck()
-hand1, hand2, hand3, hand4 = deck.split_three_seven_seven_seven()
-cm = CardsManipulator()
-for card in hand2:
-    print(card)
-p = cm.calculate_all_pos_results(hand2)
-
-print(cm.dict_of_probabilities(cm.parse_all_pos_results(p)))
-
-
-

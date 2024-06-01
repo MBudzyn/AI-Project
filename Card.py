@@ -16,7 +16,6 @@ class Card:
     def __lt__(self, other: 'Card') -> bool:
         return self.value < other.value
 
-
     def __copy__(self):
         return Card(self.rank, self.suit)
 
@@ -34,13 +33,11 @@ class Card:
         else:
             return False
 
-
-
-
-
     def is_part_of_meld(self) -> bool:
         return self.rank in ['Q', 'K']
 
-    def is_meld(self, other: 'Card'):
+    def is_meld(self, other: 'Card') -> bool:
         return self.is_part_of_meld() and other.is_part_of_meld() and \
             self.rank != other.rank and self.suit == other.suit
+
+
