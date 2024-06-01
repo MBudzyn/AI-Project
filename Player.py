@@ -8,26 +8,24 @@ from GlobalVariables import *
 class Player:
     def __init__(self):
         self.hand: list['Card'] = []
-        self.played: list['Card'] = []
         self.trick_pile: list['Card'] = []
         self.other_players: list['Player'] = []
+        self.played: list['Card'] = []
         self.cards_manipulator = CardsManipulator()
         self.actual_value_in_auction = 0 # pamietac zeby aktualizowac
         self.sum_of_points = 0
         self.is_declarer = False
         self.declaration_history: list[list[int]] = []
-
-
-
+        self.trump = None
 
     def set_hand(self, hand: list['Card']):
         self.hand = hand
+
     def calculate_act_score(self) -> int:
         return sum([card.value for card in self.trick_pile])
 
     def is_melding(self, card: 'Card') -> bool:
         return card.is_part_of_meld() and any([card.is_meld(other) for other in self.hand if other != card])
-
 
     def calculate_act_hand(self) -> int:
         return sum([card.value for card in self.hand])
@@ -91,7 +89,6 @@ class Player:
         pom = random.sample(self.hand, 2)
         self.hand = [card for card in self.hand if card not in pom]
         return pom
-
 
     def decide_to_play_or_pass(self, points: int) -> bool:
         return random.choice([True] * PROBABILITY_TO_PLAY_FOR_RANDOM +

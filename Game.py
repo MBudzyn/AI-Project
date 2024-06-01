@@ -7,7 +7,7 @@ from Player import Player
 from Auction import Auction
 import pygame
 import time
-
+from Bot import Bot
 
 def winning_card(cards_in_order: list['Card'], trump) -> 'Card':
     if cards_in_order[1].can_beat(cards_in_order[0], trump):
@@ -76,7 +76,10 @@ class Game:
             cards_in_order = [None, None, None]
 
             current_player_index = self.playing_player_index
-            cards_in_order[0] = self.players_in_order[current_player_index].play_random_card(None, None, self.trump)
+            if current_player_index == 2:
+                cards_in_order[0] = self.players_in_order[current_player_index].play_first_card_in_trick()
+            else:
+                cards_in_order[0] = self.players_in_order[current_player_index].play_random_card(None, None, self.trump)
             if self.players_in_order[current_player_index].is_melding(cards_in_order[0]):
                 print(f"Player {current_player_index + 1} melds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {cards_in_order[0]}")
                 self.trump = cards_in_order[0].suit
@@ -115,7 +118,7 @@ class Game:
                 print("No trump declared yet")
             if draw:
                 self.draw_cards(cards_in_order)
-auction = Auction([Player(), Player(), Player()])
+auction = Auction([Player(), Player(), Bot()])
 auction.play()
 print("----------------------------------------------------------------------------------------------------------")
 game = Game(auction)
