@@ -19,10 +19,15 @@ class Player:
 
 
 
+
     def set_hand(self, hand: list['Card']):
         self.hand = hand
     def calculate_act_score(self) -> int:
         return sum([card.value for card in self.trick_pile])
+
+    def is_melding(self, card: 'Card') -> bool:
+        return card.is_part_of_meld() and any([card.is_meld(other) for other in self.hand if other != card])
+
 
     def calculate_act_hand(self) -> int:
         return sum([card.value for card in self.hand])
@@ -51,7 +56,7 @@ class Player:
     def redraw(self) -> bool:
         return not self.correct_hand()
 
-    def possible_moves(self, first_card: 'Card'= None,second_card: 'Card'= None, trump: str = None) -> list['Card']:
+    def possible_moves(self, first_card ,second_card, trump) -> list['Card']:
         if first_card is None:
             return self.hand
         if second_card is not None:
@@ -75,7 +80,18 @@ class Player:
                 return greater
             else:
                 return self.hand
-        
+
+    def play_random_card(self, first_card, second_card, trump) -> 'Card':
+        c = random.choice(self.possible_moves(first_card = first_card, second_card = second_card, trump = trump))
+        self.hand.remove(c)
+        self.played.append(c)
+        return c
+
+    def discard_two_cards(self) -> list['Card']:
+        pom = random.sample(self.hand, 2)
+        self.hand = [card for card in self.hand if card not in pom]
+        return pom
+
 
     def decide_to_play_or_pass(self, points: int) -> bool:
         return random.choice([True] * PROBABILITY_TO_PLAY_FOR_RANDOM +

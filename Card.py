@@ -11,13 +11,10 @@ class Card:
         self.quality = QUALITY_DICT[rank]
 
     def __gt__(self, other: 'Card') -> bool:
-        return self.quality > other.quality
+        return self.value > other.value
 
     def __lt__(self, other: 'Card') -> bool:
-        return self.quality < other.quality
-
-
-
+        return self.value < other.value
 
 
     def __copy__(self):
@@ -29,7 +26,7 @@ class Card:
     def __eq__(self, other: 'Card') -> bool:
         return self.rank == other.rank and self.suit == other.suit
 
-    def can_beat(self, other: 'Card', trump: str) -> bool:
+    def can_beat(self, other: 'Card', trump) -> bool:
         if self.suit == other.suit:
             return self > other
         elif self.suit == trump:
