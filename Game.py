@@ -6,6 +6,7 @@ from Auction import Auction
 import pygame
 import time
 from Bot import Bot
+from GlobalVariables import MELD_POINTS_DICT
 
 
 def winning_card(cards_in_order: list['Card'], trump) -> 'Card':
@@ -69,8 +70,8 @@ class Game:
         cards_in_order[0] = self.get_player_by_index(self.playing_player_index).play_card(None, None, self.trump)
 
         if self.get_player_by_index(self.playing_player_index).is_melding(cards_in_order[0]):
-            print(
-                f"Player {current_player_index + 1} melds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {cards_in_order[0]}")
+            print(f"Player {current_player_index + 1} melds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {cards_in_order[0]}")
+            self.get_player_by_index(self.playing_player_index).sum_of_points += MELD_POINTS_DICT[cards_in_order[0].suit]
             self.trump = cards_in_order[0].suit
         print(f"Player {current_player_index + 1} played {cards_in_order[0]}")
 
@@ -119,8 +120,9 @@ class Game:
         else:
             print("No trump declared yet")
 
-    def play2(self, _print: bool = False):
+    def play(self, _print: bool = False):
         self.split_two_cards()
+        self.get_player_by_index(self.playing_player_index).begin_of_playing_round()
         for i in range(8):
             cards_in_order = self.play_one_round()
             self.actualize_after_round(cards_in_order)
@@ -133,4 +135,4 @@ auction = Auction([Player(), Player(), Bot()])
 auction.play()
 print("----------------------------------------------------------------------------------------------------------")
 game = Game(auction)
-game.play2()
+game.play()

@@ -1,11 +1,12 @@
 from typeguard import *
 from Card import Card
-from CardsManipulator import CardsManipulator
 from Player import Player
 @typechecked
 class Bot(Player):
     def __init__(self):
         super().__init__()
+        self.guaranteed_winners = []
+        self.melds = set()
 
     def decide_to_play_or_pass(self, points: int) -> bool:
         cards_in_meld_suite = self.cards_in_meld_suite()
@@ -19,7 +20,12 @@ class Bot(Player):
             return True
         return probabilities[f">={points}"] > 50
 
-    def define_guaranteed_winners(self) -> list['Card']:
+    def begin_of_playing_round(self):
+        self.guaranteed_winners = self.define_guaranteed_winners()
+        self.melds = self.define_melds_on_hand()
+
+
+    def define_guaranteed_winners(self) -> list['Card']: # dokladnie sprawdzic czy dziala bez bledow
         guaranteed_winners = self.cards_manipulator.guaranteed_winners(self.hand)
         res = []
         for card in self.hand:
@@ -39,12 +45,11 @@ class Bot(Player):
         return melds
 
     def discard_two_cards(self) -> list['Card']:
-        guaranteed_winners = self.define_guaranteed_winners()
-        melds = self.define_melds_on_hand()
+
         to_discard = []
         sorted_hand = sorted(self.hand, key = lambda x: x.value)
         for card in sorted_hand:
-            if card in guaranteed_winners or card.suit in melds:
+            if card in self.guaranteed_winners or card.suit in self.melds:
                 continue
             else:
                 to_discard.append(card)
