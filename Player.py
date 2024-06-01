@@ -51,6 +51,32 @@ class Player:
     def redraw(self) -> bool:
         return not self.correct_hand()
 
+    def possible_moves(self, first_card: 'Card'= None,second_card: 'Card'= None, trump: str = None) -> list['Card']:
+        if first_card is None:
+            return self.hand
+        if second_card is not None:
+            if first_card.suit == second_card.suit:
+                card_to_compare = max(first_card, second_card)
+            elif second_card.suit == trump:
+                card_to_compare = second_card
+            else:
+                card_to_compare = first_card
+        else:
+            card_to_compare = first_card
+        in_suit = [card for card in self.hand if card.suit == first_card.suit]
+        if in_suit:
+            greater = [card for card in in_suit if card.can_beat(card_to_compare,trump)]
+            if greater:
+                return greater
+            return in_suit
+        else:
+            greater = [card for card in self.hand if card.can_beat(card_to_compare,trump)]
+            if greater:
+                return greater
+            else:
+                return self.hand
+        
+
     def decide_to_play_or_pass(self, points: int) -> bool:
         return random.choice([True] * PROBABILITY_TO_PLAY_FOR_RANDOM +
                              [False] * (100 - PROBABILITY_TO_PLAY_FOR_RANDOM))
