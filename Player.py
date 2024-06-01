@@ -91,6 +91,9 @@ class Player:
         self.played.append(c)
         return c
 
+    def set_actual_value_in_auction(self, value: int):
+        self.actual_value_in_auction = value
+
     def discard_two_cards(self) -> list['Card']:
         pom = random.sample(self.hand, 2)
         self.hand = [card for card in self.hand if card not in pom]
