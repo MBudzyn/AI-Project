@@ -10,6 +10,16 @@ class Card:
         self.value = RANK_VALUE_DICT[rank]
         self.quality = QUALITY_DICT[rank]
 
+    def __gt__(self, other: 'Card') -> bool:
+        return self.quality > other.quality
+
+    def __lt__(self, other: 'Card') -> bool:
+        return self.quality < other.quality
+
+
+
+
+
     def __copy__(self):
         return Card(self.rank, self.suit)
 
@@ -18,6 +28,18 @@ class Card:
 
     def __eq__(self, other: 'Card') -> bool:
         return self.rank == other.rank and self.suit == other.suit
+
+    def can_beat(self, other: 'Card', trump: str) -> bool:
+        if self.suit == other.suit:
+            return self > other
+        elif self.suit == trump:
+            return True
+        else:
+            return False
+
+
+
+
 
     def is_part_of_meld(self) -> bool:
         return self.rank in ['Q', 'K']
