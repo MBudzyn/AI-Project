@@ -55,7 +55,7 @@ class Bot(Player):
         self.hand = sorted_hand[2:]
         return sorted_hand[:2]
 
-    def play_first_card_in_trick(self):
+    def play_card(self, card1, card2, trump) -> 'Card':
         guaranteed_winners = self.define_guaranteed_winners()
         melds = self.define_melds_on_hand()
         if guaranteed_winners:
@@ -67,7 +67,7 @@ class Bot(Player):
                     self.hand.remove(card)
                     return card
         else:
-            return self.play_random_card(None, None, self.trump)
+            return self.hand.pop()
 
 
 

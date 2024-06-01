@@ -21,6 +21,12 @@ class Player:
     def set_hand(self, hand: list['Card']):
         self.hand = hand
 
+    def add_card_to_hand(self, card: 'Card'):
+        self.hand.append(card)
+
+    def add_cards_to_trick_pile(self, cards: list['Card']):
+        self.trick_pile += cards
+
     def calculate_act_score(self) -> int:
         return sum([card.value for card in self.trick_pile])
 
@@ -79,7 +85,7 @@ class Player:
             else:
                 return self.hand
 
-    def play_random_card(self, first_card, second_card, trump) -> 'Card':
+    def play_card(self, first_card, second_card, trump) -> 'Card':
         c = random.choice(self.possible_moves(first_card = first_card, second_card = second_card, trump = trump))
         self.hand.remove(c)
         self.played.append(c)
