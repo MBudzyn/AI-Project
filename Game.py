@@ -4,7 +4,7 @@ from CardsManipulator import CardsManipulator
 from Player import Player
 import pygame
 import time
-
+from Auction import Auction
 from GlobalVariables import MELD_POINTS_DICT
 
 
@@ -60,8 +60,9 @@ class Game:
         card_ind = cards_in_order.index(w_card)
         winner_index = (self.playing_player_index + card_ind) % 3
         self.players_in_order[winner_index].trick_pile += cards_in_order
-        self.players_in_order[winner_index].sum_of_points += sum([card.value for card in cards_in_order])
+        self.players_in_order[winner_index].sum_of_points_in_actual_round += sum([card.value for card in cards_in_order])
         self.playing_player_index = winner_index
+
 
     def get_all_players_tricks(self):
         return (self.get_player_by_index(0).trick_pile +
@@ -107,6 +108,21 @@ class Game:
                 pygame.display.flip()
                 time.sleep(1.5)
 
+    def actualize_after_game(self):
+        for player in self.players_in_order:
+            player.trick_pile = []
+            if player.is_declarer:
+                if player.sum_of_points_in_actual_round >= player.points_to_play:
+                    player.sum_of_points += player.points_to_play
+                else:
+                    player.sum_of_points -= player.points_to_play
+            else:
+                player.sum_of_points += ((player.sum_of_points_in_actual_round + 5) // 10) * 10
+
+            player.sum_of_points_in_actual_round = 0
+            player.actual_value_in_auction = 0
+
+
     def print_data(self):
 
         for k in range(3):
@@ -133,14 +149,8 @@ class Game:
             if _print:
                 self.print_cards(cards_in_order)
             self.print_data()
+        self.actualize_after_game()
 
 
-from Bot import Bot
-from Auction import Auction
-player1 = Player()
-player2 = Player()
-auction = Auction([player1, player2, Bot([player1, player2])])
-auction.play()
-game = Game(auction)
-game.play()
+
 

@@ -14,9 +14,16 @@ class Player:
         self.cards_manipulator = CardsManipulator()
         self.actual_value_in_auction = 0 # pamietac zeby aktualizowac
         self.sum_of_points = 0
+        self.sum_of_points_in_actual_round = 0
         self.is_declarer = False
         self.declaration_history: list[list[int]] = []
         self.trump = None
+        self.points_to_play = 0
+
+
+    def set_declarer(self, points_to_play):
+        self.is_declarer = True
+        self.points_to_play = points_to_play
 
     def set_hand(self, hand: list['Card']):
         self.hand = hand

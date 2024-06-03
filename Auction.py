@@ -36,11 +36,17 @@ class Auction:
         print("player2: ", [str(card) for card in self.players_in_order[1].hand])
         print("player3: ", [str(card) for card in self.players_in_order[2].hand])
 
-    def actualize_after_auction(self, active_player_ind: int):
+    def actualize_after_auction(self, active_player_ind: int, points_to_play: int):
         self.active_player_index = active_player_ind
         active_player = self.get_player_by_index(active_player_ind)
         active_player.hand += self.talon
+        active_player.set_declarer(points_to_play)
         print(self.active_player_index)
+        self.get_player_by_index((self.active_player_index + 1) % 3).points_to_play = 0
+        self.get_player_by_index((self.active_player_index + 2) % 3).points_to_play = 0
+        self.get_player_by_index((self.active_player_index + 1) % 3).is_declarer = False
+        self.get_player_by_index((self.active_player_index + 2) % 3).is_declarer = False
+
 
     def play(self):
         self.get_player_by_index(2).set_actual_value_in_auction(100)
@@ -67,11 +73,9 @@ class Auction:
             turn_index += 1
 
         active_player_index = in_play.index(True)
-        self.actualize_after_auction(active_player_index)
 
+        self.actualize_after_auction(active_player_index, to_play - 10)
 
-# auction = Auction([Player(), Player(), Bot()])
-# auction.play()
 
 
 
