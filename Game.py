@@ -30,7 +30,7 @@ class Game:
         self.playing_player_index = auction.active_player_index
         self.trick_pile: list['Card'] = []
         self.trump = None
-        self.init_pygame()
+        #self.init_pygame()
 
     def get_player_by_index(self, index: int) -> 'Player':
         return self.players_in_order[index]
@@ -64,10 +64,15 @@ class Game:
         self.players_in_order[winner_index].sum_of_points += sum([card.value for card in cards_in_order])
         self.playing_player_index = winner_index
 
+    def get_all_players_tricks(self):
+        return (self.get_player_by_index(0).trick_pile +
+                self.get_player_by_index(1).trick_pile +
+                self.get_player_by_index(2).trick_pile)
+
     def play_one_round(self) -> list['Card']:
         cards_in_order = [None, None, None]
         current_player_index = self.playing_player_index
-        cards_in_order[0] = self.get_player_by_index(self.playing_player_index).play_card(None, None, self.trump)
+        cards_in_order[0] = self.get_player_by_index(self.playing_player_index).play_card(None, None, self.trump, self.get_all_players_tricks())
 
         if self.get_player_by_index(self.playing_player_index).is_melding(cards_in_order[0]):
             print(f"Player {current_player_index + 1} melds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {cards_in_order[0]}")
@@ -79,7 +84,7 @@ class Game:
             current_player_index = (self.playing_player_index + j) % 3
             cards_in_order[j] = self.players_in_order[current_player_index].play_card(cards_in_order[0],
                                                                                       cards_in_order[1],
-                                                                                      self.trump)
+                                                                                      self.trump,self.get_all_players_tricks())
             print(f"Player {current_player_index + 1} played {cards_in_order[j]}")
 
         return cards_in_order
@@ -131,8 +136,9 @@ class Game:
             self.print_data()
 
 
+
 auction = Auction([Player(), Player(), Bot()])
 auction.play()
-print("----------------------------------------------------------------------------------------------------------")
 game = Game(auction)
 game.play()
+
