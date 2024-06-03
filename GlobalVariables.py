@@ -4,3 +4,4 @@ QUALITY_DICT = {"A": 0, "K": 2, "Q": 3, "J": 4, "T": 1, "N": 5}
 REVERSED_QUALITY_DICT = {0: "A", 1: "T", 2: "K", 3: "Q", 4: "J", 5: "N"}
 POINTS_IN_ROUND = [11, 10, 14, 10, 9, 16, 20, 30]
 PROBABILITY_TO_PLAY_FOR_RANDOM = 25
+BOT_SKILL_POINTS = 20
