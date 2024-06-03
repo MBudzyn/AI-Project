@@ -14,6 +14,9 @@ class CardsManipulator:
     def get_missing_cards(self, hand: list['Card']) -> list['Card']:
         return [card for card in self.full_deck() if card not in hand]
 
+    def all_in_same_suit(self, cards: list['Card']) -> bool:
+        return all([card.suit == cards[0].suit for card in cards])
+
     def get_all_poss_talons(self, hand: list['Card']) -> list[list['Card']]:
         res = []
         cards = self.get_missing_cards(hand)
