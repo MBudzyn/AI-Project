@@ -85,7 +85,9 @@ class Player:
             else:
                 return self.hand
 
-    def play_card(self, first_card, second_card, trump) -> 'Card':
+
+
+    def play_card(self, first_card, second_card, trump, played_cards) -> 'Card':
         c = random.choice(self.possible_moves(first_card = first_card, second_card = second_card, trump = trump))
         self.hand.remove(c)
         self.played.append(c)
