@@ -2,10 +2,9 @@ from typeguard import *
 from Card import Card
 from CardsManipulator import CardsManipulator
 from Player import Player
-from Auction import Auction
 import pygame
 import time
-from Bot import Bot
+
 from GlobalVariables import MELD_POINTS_DICT
 
 
@@ -27,7 +26,7 @@ class Game:
     def __init__(self, auction: 'Auction'):
         self.players_in_order: list['Player'] = auction.players_in_order
         self.cards_manipulator = CardsManipulator()
-        self.playing_player_index = auction.active_player_index
+        self.playing_player_index: int = auction.active_player_index
         self.trick_pile: list['Card'] = []
         self.trump = None
         #self.init_pygame()
@@ -136,8 +135,11 @@ class Game:
             self.print_data()
 
 
-
-auction = Auction([Player(), Player(), Bot()])
+from Bot import Bot
+from Auction import Auction
+player1 = Player()
+player2 = Player()
+auction = Auction([player1, player2, Bot([player1, player2])])
 auction.play()
 game = Game(auction)
 game.play()

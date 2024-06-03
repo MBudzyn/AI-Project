@@ -70,8 +70,8 @@ class Auction:
         self.actualize_after_auction(active_player_index)
 
 
-auction = Auction([Player(), Player(), Bot()])
-auction.play()
+# auction = Auction([Player(), Player(), Bot()])
+# auction.play()
 
 
 

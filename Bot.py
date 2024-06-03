@@ -1,15 +1,18 @@
-import random
 
+import random
 from typeguard import *
 from Card import Card
 from Player import Player
 from GlobalVariables import *
+
+
 @typechecked
 class Bot(Player):
-    def __init__(self):
+    def __init__(self,other_players: list['Player']):
         super().__init__()
         self.guaranteed_winners = []
         self.melds = set()
+        self.other_players = other_players
 
     def decide_to_play_or_pass(self, points: int) -> bool:
         cards_in_meld_suite = self.cards_in_meld_suite()
@@ -95,12 +98,26 @@ class Bot(Player):
         return sorted_hand[:2]
 
     def play_not_first_card(self, first_card, second_card, trump, played_cards=[]) -> 'Card':
+        our_player_ind = 0
+        t = []
+        if first_card is not None:
+            t.append(first_card)
+        if second_card is not None:
+            t.append(second_card)
+        missing_cards = self.cards_manipulator.get_missing_cards(played_cards + t + self.hand)
+        random.shuffle(missing_cards)
+        first_half = missing_cards[:len(missing_cards) // 2]
+        second_half = missing_cards[len(missing_cards) // 2:]
+
+
+
         possible_moves = self.possible_moves(first_card, second_card, trump)
         if len(possible_moves) == 1:
             c = possible_moves[0]
             self.hand.remove(c)
             return c
         else:
+
             guaranteed_winners = self.define_guaranteed_winners2(played_cards, trump)
             if first_card in guaranteed_winners:
                 if self.cards_manipulator.all_in_same_suit(possible_moves):
@@ -127,11 +144,9 @@ class Bot(Player):
                             self.hand.remove(card)
                             return card
         c = random.choice(possible_moves)
+
         self.hand.remove(c)
         return c # zamienić na monte carlo
-
-
-
 
 
 
