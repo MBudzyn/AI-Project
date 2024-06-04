@@ -7,11 +7,12 @@ from Auction import Auction
 from Player import Player
 from Bot import Bot
 from typeguard import *
-from GlobalVariables import MELD_POINTS_DICT
-
+from GlobalVariables import MELD_POINTS_DICT, MONTE_CARLO_ITERATIONS, MONTE_CARLO_SYMULATIONS
 import random
 import math
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 @typechecked
 class MCTSNode:
@@ -20,7 +21,7 @@ class MCTSNode:
         self.parent = parent
         self.children = []
         self.visits = 0
-        self.wins = 0  # To będzie przechowywać sumę punktów zdobytych w symulacjach
+        self.wins = 0
 
     def is_fully_expanded(self):
         return len(self.children) == len(self.state.get_legal_actions())
@@ -35,10 +36,12 @@ class MCTSNode:
     def expand(self):
         actions = self.state.get_legal_actions()
         for action in actions:
-            new_state = self.state.take_action(action)
-            child_node = MCTSNode(new_state, parent=self)
-            self.children.append(child_node)
-            return child_node
+            if not any(child.state.last_action == action for child in self.children):
+                new_state = self.state.take_action(action)
+                child_node = MCTSNode(new_state, parent=self)
+                self.children.append(child_node)
+                logging.debug(f"Expanded with action: {action}, total children: {len(self.children)}")
+                return child_node
         raise Exception("Should never reach here if node is not fully expanded")
 
     def best_action(self):
@@ -49,9 +52,9 @@ class MCTSNode:
         current_state = self.state.clone()
         while current_state.get_legal_actions():
             current_state = current_state.take_action(random.choice(current_state.get_legal_actions()))
-        return current_state.calculate_if_its_win(self.state.our_player_ind)
+        return current_state.calculate_if_its_win(self.state.actual_moving_player)
 
-    def simulate(self, ite=6):
+    def simulate(self, ite=MONTE_CARLO_SYMULATIONS):
         points = 0
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.simulate_single) for _ in range(ite)]
@@ -61,103 +64,87 @@ class MCTSNode:
 
 
 class MCTS:
-    def __init__(self, itermax):
+    def __init__(self, itermax=MONTE_CARLO_ITERATIONS):
         self.itermax = itermax
 
     def search(self, initial_state):
         root = MCTSNode(state=initial_state)
 
-        for _ in range(self.itermax):
+        for i in range(self.itermax):
             node = root
 
             # Selection
             while node.is_fully_expanded() and node.children:
                 node = node.best_child()
+                logging.debug(f"Selection - Iteration {i}: Best child selected")
 
             # Expansion
             if not node.is_fully_expanded():
                 node = node.expand()
+                logging.debug(f"Expansion - Iteration {i}: Node expanded")
 
             # Simulation
             points = node.simulate()
+            logging.debug(f"Simulation - Iteration {i}: Points scored {points}")
 
             # Backpropagation
             while node is not None:
                 node.visits += 1
                 node.wins += points
+                logging.debug(f"Backpropagation - Iteration {i}: Node visits {node.visits}, wins {node.wins}")
                 node = node.parent
 
         return root.best_action().state.last_action
 
 
-# Example usage with hypothetical game state:
 class GameState:
-
-    def __init__(self, players_in_order, playing_player_ind, trump,
-                 our_player_ind: int, main_player_ind: int,
-                 points_to_play: int, cards_on_table = [None, None, None]):
+    def __init__(self, players_in_order, trump,
+                 actual_moving_player, main_player_ind: int,
+                 points_to_play: int, cards_on_table=[None, None, None]):
         self.players_in_order = players_in_order
-        self.playing_player_index: int = playing_player_ind
-        self.our_player_ind = our_player_ind
+        self.actual_moving_player = actual_moving_player
         self.main_player_ind = main_player_ind
         self.cards_on_table = cards_on_table
         self.points_to_play = points_to_play
         self.trump = trump
         self.last_action = None
 
-
     def get_player_by_ind(self, ind):
         return self.players_in_order[ind]
+
     def get_legal_actions(self) -> list['Card']:
-        return self.get_player_by_ind(self.playing_player_index).possible_moves(self.cards_on_table[0], self.cards_on_table[1], self.trump)
+        return self.get_player_by_ind(self.actual_moving_player).possible_moves(self.cards_on_table[0], self.cards_on_table[1], self.trump)
 
     def take_action(self, card: 'Card'):
         from Game import winning_card
         new_state = self.clone()
         new_state.last_action = card
-        if new_state.cards_on_table[0] is None and new_state.cards_on_table[1] is None and new_state.cards_on_table[2] is None:
-            if self.get_player_by_ind(self.playing_player_index).is_melding(card):
-                new_state.get_player_by_ind(self.playing_player_index).sum_of_points += MELD_POINTS_DICT[card.suit]
+        if all(c is None for c in new_state.cards_on_table):
+            if self.get_player_by_ind(self.actual_moving_player).is_melding(card):
+                new_state.get_player_by_ind(self.actual_moving_player).sum_of_points_in_actual_round += MELD_POINTS_DICT[card.suit]
                 new_state.trump = card.suit
-        new_state.cards_on_table[new_state.playing_player_index] = card
-        new_state.get_player_by_ind(new_state.playing_player_index).hand.remove(card)
-        new_state.playing_player_index = (new_state.playing_player_index + 1) % 3
-        if new_state.cards_on_table[0] is not None and new_state.cards_on_table[1] is not None and new_state.cards_on_table[2] is not None:
+        new_state.cards_on_table[new_state.actual_moving_player] = card
+        new_state.get_player_by_ind(new_state.actual_moving_player).hand.remove(card)
+        new_state.actual_moving_player = (new_state.actual_moving_player + 1) % 3
+
+
+        if all(c is not None for c in new_state.cards_on_table):
             w_c = winning_card(new_state.cards_on_table, new_state.trump)
             card_ind = new_state.cards_on_table.index(w_c)
-            winner_index = (new_state.playing_player_index + card_ind) % 3
+            winner_index = card_ind
             new_state.get_player_by_ind(winner_index).trick_pile += new_state.cards_on_table
-            new_state.get_player_by_ind(winner_index).sum_of_points += sum([card.value for card in new_state.cards_on_table])
-            new_state.playing_player_index = winner_index
+            new_state.get_player_by_ind(winner_index).sum_of_points_in_actual_round += sum(card.value for card in new_state.cards_on_table)
+            new_state.actual_moving_player = winner_index
             new_state.cards_on_table = [None, None, None]
         return new_state
 
-
-
-    def calculate_if_its_win(self, our_player_ind):
-        if our_player_ind == self.main_player_ind:
-            return 1 if self.get_player_by_ind(self.main_player_ind).sum_of_points >= self.points_to_play else 0
+    def calculate_if_its_win(self, moving_player_ind: int):
+        if moving_player_ind == self.main_player_ind:
+            return 1 if self.get_player_by_ind(self.main_player_ind).sum_of_points_in_actual_round >= self.points_to_play else 0
         else:
-            return 1 if self.get_player_by_ind(self.main_player_ind).sum_of_points < self.points_to_play else 0
-
+            return 1 if self.get_player_by_ind(self.main_player_ind).sum_of_points_in_actual_round < self.points_to_play else 0
 
     def clone(self):
         return copy.deepcopy(self)
 
-
-
-
-# Initialize game state
-# auction = Auction([Player(), Player(), Bot()])
-# auction.play()
-# from Game import Game
-# game = Game(auction)
-# initial_state = GameState(auction.players_in_order, auction.playing_player_index,None,
-#                           2,auction.playing_player_index, game.get_player_by_index(auction.playing_player_index).actual_value_in_auction)
-
-# s = time.time()
-# mcts = MCTS(itermax=20)
-# best_action = mcts.search(initial_state)
-# print(best_action)
-# e = time.time()
-# print("time: " ,e-s)
+# Test function to execute Monte Carlo Tree Search

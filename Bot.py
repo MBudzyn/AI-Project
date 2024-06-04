@@ -4,7 +4,7 @@ from typeguard import *
 from Card import Card
 from Player import Player
 from GlobalVariables import *
-
+from copy import deepcopy
 
 @typechecked
 class Bot(Player):
@@ -98,16 +98,50 @@ class Bot(Player):
         return sorted_hand[:2]
 
     def play_not_first_card(self, first_card, second_card, trump, played_cards=[]) -> 'Card':
-        our_player_ind = 0
+        from MonteCarlo import GameState, MCTS
+
+
+        players = []
+        actual_move_player_ind = 0
         t = []
         if first_card is not None:
             t.append(first_card)
         if second_card is not None:
             t.append(second_card)
-        missing_cards = self.cards_manipulator.get_missing_cards(played_cards + t + self.hand)
+        missing_cards = self.cards_manipulator.get_missing_cards(played_cards + t + deepcopy(self.hand))
         random.shuffle(missing_cards)
         first_half = missing_cards[:len(missing_cards) // 2]
         second_half = missing_cards[len(missing_cards) // 2:]
+        if len(t) == 2:
+            players = deepcopy(self.other_players) + [deepcopy(self)]
+            players[0].hand = first_half
+            players[1].hand = second_half
+            actual_move_player_ind = 2
+
+
+        if len(t) == 1:
+            players = [deepcopy(self.other_players[0])] + [deepcopy(self)] + [deepcopy(self.other_players[1])]
+            players[0].hand = first_half
+            players[2].hand = second_half
+            actual_move_player_ind = 1
+        if len(t) == 0:
+            players = [deepcopy(self)] + deepcopy(self.other_players)
+            players[1].hand = first_half
+            players[2].hand = second_half
+            actual_move_player_ind = 0
+
+        if players[0].is_declarer:
+            main_player_ind = 0
+            points_to_play = players[0].points_to_play
+        elif players[1].is_declarer:
+            main_player_ind = 1
+            points_to_play = players[1].points_to_play
+        else:
+            main_player_ind = 2
+            points_to_play = players[2].points_to_play
+
+
+
 
 
 
@@ -126,8 +160,9 @@ class Bot(Player):
                     return c
                 else:
                     c = random.choice(possible_moves)
-                    self.hand.remove(c)
-                    return c # zamienić na monte carlo
+                    mcts = MCTS(20).search(GameState(players, trump, actual_move_player_ind, main_player_ind, points_to_play, [first_card] + [second_card] + [None]))
+                    self.hand.remove(mcts)
+                    return mcts # zamienić na monte carlo
             else:
                 if second_card is not None:
                     if second_card.can_beat(first_card, trump):
@@ -143,11 +178,12 @@ class Bot(Player):
                         if card.can_beat(first_card, trump):
                             self.hand.remove(card)
                             return card
-        c = random.choice(possible_moves)
 
-        self.hand.remove(c)
-        return c # zamienić na monte carlo
 
+        mcts = MCTS(20).search(GameState(players, trump, actual_move_player_ind, main_player_ind, points_to_play,
+                                         [first_card] + [second_card] + [None]))
+        self.hand.remove(mcts)
+        return mcts
 
 
     def play_card(self, first_card, second_card, trump, played_cards=[]) -> 'Card':
@@ -160,6 +196,7 @@ class Bot(Player):
 
 
     def play_first_card2(self, played_cards, trump) -> 'Card':
+        from MonteCarlo import GameState, MCTS
         guaranteed_winners = self.define_guaranteed_winners2(played_cards, trump)
         melds = self.define_melds_on_hand()
         if guaranteed_winners:
@@ -171,7 +208,31 @@ class Bot(Player):
                     self.hand.remove(card)
                     return card
         else:
-            return self.hand.pop() # zamienić na monte carlo
+
+            players = [deepcopy(self)] + deepcopy(self.other_players)
+            missing_cards = self.cards_manipulator.get_missing_cards(played_cards + deepcopy(self.hand))
+            random.shuffle(missing_cards)
+            first_half = missing_cards[:len(missing_cards) // 2]
+            second_half = missing_cards[len(missing_cards) // 2:]
+            players[1].hand = first_half
+            players[2].hand = second_half
+            move_player_ind = 0
+
+            if players[0].is_declarer:
+                main_player_ind = 0
+                points_to_play = players[0].points_to_play
+            elif players[1].is_declarer:
+                main_player_ind = 1
+                points_to_play = players[1].points_to_play
+            else:
+                main_player_ind = 2
+                points_to_play = players[2].points_to_play
+
+            mcts = MCTS(20).search(GameState(players, trump, move_player_ind, main_player_ind, points_to_play, [None] + [None] + [None]))
+
+            self.hand.remove(mcts)
+
+            return mcts# zamienić na monte carlo
 
 
 

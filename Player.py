@@ -16,7 +16,6 @@ class Player:
         self.sum_of_points = 0
         self.sum_of_points_in_actual_round = 0
         self.is_declarer = False
-        self.declaration_history: list[list[int]] = []
         self.trump = None
         self.points_to_play = 0
 
