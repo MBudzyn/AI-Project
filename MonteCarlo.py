@@ -2,10 +2,6 @@
 
 import copy
 import concurrent.futures
-import time
-from Auction import Auction
-from Player import Player
-from Bot import Bot
 from typeguard import *
 from GlobalVariables import MELD_POINTS_DICT, MONTE_CARLO_ITERATIONS, MONTE_CARLO_SYMULATIONS
 import random
