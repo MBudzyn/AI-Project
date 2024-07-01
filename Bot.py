@@ -6,6 +6,7 @@ from Player import Player
 from GlobalVariables import *
 from copy import deepcopy
 
+
 @typechecked
 class Bot(Player):
     def __init__(self,other_players: list['Player']):
@@ -228,7 +229,7 @@ class Bot(Player):
                 main_player_ind = 2
                 points_to_play = players[2].points_to_play
 
-            mcts = MCTS(20).search(GameState(players, trump, move_player_ind, main_player_ind, points_to_play, [None] + [None] + [None]))
+            mcts = MCTS(MONTE_CARLO_ITERATIONS).search(GameState(players, trump, move_player_ind, main_player_ind, points_to_play, [None] + [None] + [None]))
 
             self.hand.remove(mcts)
 

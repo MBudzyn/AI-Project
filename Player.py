@@ -12,7 +12,7 @@ class Player:
         self.other_players: list['Player'] = []
         self.played: list['Card'] = []
         self.cards_manipulator = CardsManipulator()
-        self.actual_value_in_auction = 0 # pamietac zeby aktualizowac
+        self.actual_value_in_auction = 0
         self.sum_of_points = 0
         self.sum_of_points_in_actual_round = 0
         self.is_declarer = False
